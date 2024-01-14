@@ -1,23 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import io from "socket.io-client";
+import { useEffect, useState } from "react";
 
+const socket = io.connect("http://localhost:3001");
 function App() {
+  const [state, setState] = useState();
+  const handleJoinRoom = (id = 1) => {
+    console.log(id);
+    socket.emit("join_room", id);
+  };
+
+  const handleSendMassage = () => {
+    const massage = {
+      id: 1,
+      message: `Hello test socket ${Math.random()}`,
+    };
+    socket.emit("send_massage", massage);
+  };
+
+  useEffect(() => {
+    socket.on("receive_massage", (massage) => {
+      console.log("receive_massage", massage);
+      setState(massage);
+    });
+  }, [socket]);
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <button onClick={() => handleJoinRoom()}>Join Room</button>
+      <button onClick={() => handleSendMassage()}>Send Massage</button>
+
+      <p>Socket: {state?.message}</p>
     </div>
   );
 }
